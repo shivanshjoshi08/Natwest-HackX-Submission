@@ -1,4 +1,3 @@
-
 import os
 import json
 import textwrap
@@ -8,20 +7,13 @@ load_dotenv()
 
 import streamlit as st
 
-# ------------------------------
-# Page config
-# ------------------------------
 st.set_page_config(page_title="CodeGrade AI", page_icon="🎓", layout="centered")
 st.title("🎓 CodeGrade AI — Static Code Review Assistant")
 st.caption("Paste requirements, upload a .py file and README.md, then let AI create a structured evaluation. (No code execution.)")
 
-# ------------------------------
-# Constants
-# ------------------------------
 MAX_CODE_CHARS = 60_000
 MAX_DOCS_CHARS = 30_000
 
-# Structured output schema (shared across providers)
 EVAL_SCHEMA: Dict[str, Any] = {
     "type": "object",
     "properties": {
@@ -68,16 +60,12 @@ EVAL_SCHEMA: Dict[str, Any] = {
     "additionalProperties": False
 }
 
-# ------------------------------
-# Helper functions
-# ------------------------------
 def _decode_bytes(b: bytes) -> str:
     for enc in ("utf-8", "utf-16", "latin-1"):
         try:
             return b.decode(enc)
         except Exception:
             continue
-    # As a last resort, replace errors
     return b.decode("utf-8", errors="replace")
 
 def _read_uploaded_text(uploader, limit: int) -> str:
@@ -124,19 +112,13 @@ def build_user_prompt(requirements: str, code_name: str, code_text: str, docs_na
         """
     ).strip()
 
-# ------------------------------
-# Provider backends
-# ------------------------------
 def call_openai(messages, schema: Dict[str, Any], model: str) -> Dict[str, Any]:
-    """Try OpenAI Responses API w/ structured outputs, then fall back to Chat Completions JSON mode."""
     try:
         from openai import OpenAI
     except Exception as e:
         raise RuntimeError("OpenAI SDK not installed. pip install openai") from e
 
-    client = OpenAI()  # API key read from env OPENAI_API_KEY
-
-    # 1) Try Responses API with structured outputs (json_schema)
+    client = OpenAI()
     try:
         r = client.responses.create(
             model=model,
@@ -150,17 +132,14 @@ def call_openai(messages, schema: Dict[str, Any], model: str) -> Dict[str, Any]:
                 }
             },
         )
-        # new SDK returns a convenient output_text
         text = getattr(r, "output_text", None)
         if not text:
-            # Fallback parse for older/newer SDK variations
             if hasattr(r, "output") and r.output and len(r.output) and hasattr(r.output[0], "content"):
                 text = r.output[0].content[0].text
             else:
                 text = str(r)
         return json.loads(text)
     except Exception:
-        # 2) Fallback: Chat Completions w/ JSON mode
         try:
             comp = client.chat.completions.create(
                 model=model,
@@ -173,7 +152,6 @@ def call_openai(messages, schema: Dict[str, Any], model: str) -> Dict[str, Any]:
             raise RuntimeError(f"OpenAI call failed: {e2}")
 
 def call_gemini(prompt_text: str, schema: Dict[str, Any], model: str) -> Dict[str, Any]:
-    """Gemini SDK with structured output, falling back to JSON MIME only."""
     try:
         import google.generativeai as genai
     except Exception as e:
@@ -185,8 +163,6 @@ def call_gemini(prompt_text: str, schema: Dict[str, Any], model: str) -> Dict[st
     genai.configure(api_key=api_key)
 
     model_obj = genai.GenerativeModel(model)
-
-    # Try structured output (response_schema) first
     try:
         resp = model_obj.generate_content(
             [prompt_text],
@@ -198,7 +174,6 @@ def call_gemini(prompt_text: str, schema: Dict[str, Any], model: str) -> Dict[st
         text = resp.text
         return json.loads(text)
     except Exception:
-        # Fallback: Just enforce JSON mime type and put schema in the prompt
         system_line = "Return ONLY a JSON object matching this JSON Schema (no backticks, no extra text):\n" + json.dumps(schema)
         resp = model_obj.generate_content(
             [system_line + "\n\n" + prompt_text],
@@ -209,9 +184,6 @@ def call_gemini(prompt_text: str, schema: Dict[str, Any], model: str) -> Dict[st
         text = resp.text
         return json.loads(text)
 
-# ------------------------------
-# UI Controls
-# ------------------------------
 with st.form("grade-form", clear_on_submit=False):
     requirements = st.text_area(
         "Project requirements",
@@ -231,7 +203,6 @@ with st.form("grade-form", clear_on_submit=False):
     submitted = st.form_submit_button("🔍 Evaluate Project", use_container_width=True)
 
 if submitted:
-    # Validate inputs
     if not requirements or not code_file:
         st.error("Please provide both project requirements and a Python code file.")
         st.stop()
@@ -250,7 +221,6 @@ if submitted:
         docs_text=docs_text,
     )
 
-    # Messages format compatible with both OpenAI Responses (with messages) and Chat Completions
     messages = [
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
@@ -261,16 +231,12 @@ if submitted:
             if engine == "OpenAI":
                 result = call_openai(messages, EVAL_SCHEMA, model=model_name)
             else:
-                # Gemini takes a single combined prompt
                 prompt_text = system_prompt + "\n\n" + user_prompt
                 result = call_gemini(prompt_text, EVAL_SCHEMA, model=model_name)
         except Exception as e:
             st.error(f"Analysis failed: {e}")
             st.stop()
 
-    # ------------------------------
-    # Render Report
-    # ------------------------------
     st.subheader("📋 Evaluation Report")
 
     overall = result.get("overall_score")
@@ -315,15 +281,13 @@ if submitted:
     st.markdown("### Raw JSON")
     st.json(result, expanded=False)
 
-    # Download JSON
     st.download_button(
         label="⬇️ Download report JSON",
         data=json.dumps(result, ensure_ascii=False, indent=2),
         file_name="codegrade_report.json",
         mime="application/json",
     )
-
-    # Helpful info
+    
     with st.expander("ℹ️ Notes & Environment Setup"):
         st.markdown(
             """
