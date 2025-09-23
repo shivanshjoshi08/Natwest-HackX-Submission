@@ -6,11 +6,50 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import streamlit as st
+from pathlib import Path
 
-st.set_page_config(page_title="CodeGrade AI", page_icon="🎓", layout="centered")
+# Function to load CSS file
+def load_css(file_path):
+    with open(file_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Hide the Streamlit sidebar toggle/hamburger
+st.markdown(
+    """
+    <style>
+    /* hide main menu and sidebar dragger */
+    [data-testid="stSidebarNav"] {display: none;}
+    [data-testid="stSidebar"] {display: none;}
+    /* also hide the "≡" toggle button */
+    div[data-testid="collapsedControl"] {display: none;}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Session state for theme
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"  # default theme
+
+def toggle_theme():
+    st.session_state.theme = (
+        "light" if st.session_state.theme == "dark" else "dark"
+    )
+
+# Theme toggle button (no text of current theme shown)
+st.button(
+    f"Switch Theme",
+    on_click=toggle_theme
+)
+
+# Load correct css file according to theme
+css_file = Path(__file__).parent / f"style_{st.session_state.theme}.css"
+load_css(css_file)
+
+# Your app content starts here
 st.title("🎓 CodeGrade AI — Static Code Review Assistant")
-st.caption("Paste requirements, upload a .py file and README.md, then let AI create a structured evaluation. (No code execution.)")
 
+st.write("Paste requirements, upload files, and get a static code review.")
 MAX_CODE_CHARS = 60_000
 MAX_DOCS_CHARS = 30_000
 
@@ -184,30 +223,61 @@ def call_gemini(prompt_text: str, schema: Dict[str, Any], model: str) -> Dict[st
         text = resp.text
         return json.loads(text)
 
+def export_to_pdf(result):
+    styles = getSampleStyleSheet()
+    doc = SimpleDocTemplate("report.pdf")
+    story = []
+    story.append(Paragraph("CodeGrade AI Report", styles['Title']))
+    story.append(Spacer(1, 12))
+    story.append(Paragraph(f"Overall Score: {result.get('overall_score','-')}/10", styles['Normal']))
+    for key in ["code_quality","documentation","adherence"]:
+        block = result.get(key,{})
+        story.append(Spacer(1, 12))
+        story.append(Paragraph(f"{key.title()} Score: {block.get('score','-')}/10", styles['Normal']))
+        story.append(Paragraph(f"Feedback: {block.get('feedback','')}", styles['Normal']))
+    doc.build(story)
+
+def radar_chart(scores):
+    labels = np.array(["Code Quality","Documentation","Adherence"])
+    values = np.array(scores)
+    angles = np.linspace(0, 2*np.pi, len(labels), endpoint=False)
+    values = np.concatenate((values,[values[0]]))
+    angles = np.concatenate((angles,[angles[0]]))
+
+    fig = plt.figure(figsize=(4,4))
+    ax = fig.add_subplot(111, polar=True)
+    ax.plot(angles, values, 'o-', linewidth=2)
+    ax.fill(angles, values, alpha=0.25)
+    ax.set_yticks(range(0,11,2))
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(labels)
+    st.pyplot(fig)
+
+# ---------- FORM ----------
 with st.form("grade-form", clear_on_submit=False):
-    requirements = st.text_area(
-        "Project requirements",
-        height=160,
-        placeholder="e.g., Create a Python script that calculates Body Mass Index (BMI) from user input...",
-    )
-    code_file = st.file_uploader("Student Python code (.py)", type=["py"])
-    docs_file = st.file_uploader("Documentation (README.md or .txt)", type=["md", "txt"])
+    requirements = st.text_area("Project requirements", height=160)
+    code_files = st.file_uploader("Upload Python files (.py)", type=["py"], accept_multiple_files=True)
+    docs_file = st.file_uploader("Documentation (README.md or .txt)", type=["md","txt"])
 
     st.markdown("**AI Engine**")
-    engine = st.selectbox("Provider", ["OpenAI", "Gemini"], index=0, help="Choose which API to use for analysis.")
+    engine = st.selectbox("Provider", ["OpenAI", "Gemini"], index=0)
     if engine == "OpenAI":
-        model_name = st.text_input("OpenAI model", value="gpt-4o-mini", help="e.g., gpt-4o, gpt-4o-mini, o4-mini, etc.")
+        model_name = st.text_input("OpenAI model", value="gpt-4o-mini")
     else:
-        model_name = st.text_input("Gemini model", value="gemini-1.5-pro", help="e.g., gemini-1.5-pro, gemini-1.5-flash")
+        model_name = st.text_input("Gemini model", value="gemini-1.5-pro")
 
     submitted = st.form_submit_button("🔍 Evaluate Project", use_container_width=True)
 
 if submitted:
-    if not requirements or not code_file:
-        st.error("Please provide both project requirements and a Python code file.")
+    if not requirements or not code_files:
+        st.error("Please provide both project requirements and at least one Python code file.")
         st.stop()
 
-    code_text = _read_uploaded_text(code_file, MAX_CODE_CHARS)
+    # Combine multiple files
+    code_text = ""
+    for cf in code_files:
+        code_text += f"\n\n# File: {cf.name}\n" + _read_uploaded_text(cf, MAX_CODE_CHARS)
+
     docs_text = _read_uploaded_text(docs_file, MAX_DOCS_CHARS) if docs_file else ""
 
     st.info("Your files are read-only. This tool **does not execute** any uploaded code.")
@@ -215,7 +285,7 @@ if submitted:
     system_prompt = build_system_prompt()
     user_prompt = build_user_prompt(
         requirements=requirements,
-        code_name=code_file.name if code_file else "",
+        code_name=", ".join([cf.name for cf in code_files]),
         code_text=code_text,
         docs_name=docs_file.name if docs_file else "",
         docs_text=docs_text,
@@ -240,73 +310,67 @@ if submitted:
     st.subheader("📋 Evaluation Report")
 
     overall = result.get("overall_score")
-    if isinstance(overall, (int, float)):
-        pct = max(0, min(100, int((overall / 10) * 100)))
+    if isinstance(overall,(int,float)):
+        pct = max(0,min(100,int((overall/10)*100)))
         st.progress(pct, text=f"Overall Score: {overall}/10")
     else:
         st.write("Overall Score: (not provided)")
 
     cols = st.columns(3)
-    for i, key in enumerate(["code_quality", "documentation", "adherence"]):
+    scores=[]
+    for i, key in enumerate(["code_quality","documentation","adherence"]):
         with cols[i]:
-            block = result.get(key, {})
-            score = block.get("score", "—")
-            st.metric(label=key.replace("_", " ").title(), value=f"{score}/10" if isinstance(score, (int, float)) else "n/a")
+            block=result.get(key,{})
+            score=block.get("score","—")
+            scores.append(score if isinstance(score,(int,float)) else 0)
+            st.metric(label=key.replace("_"," ").title(),value=f"{score}/10" if isinstance(score,(int,float)) else "n/a")
 
-    for key, title in [
-        ("code_quality", "Code Quality"),
-        ("documentation", "Documentation"),
-        ("adherence", "Adherence to Requirements"),
-    ]:
-        block = result.get(key, {})
-        feedback = block.get("feedback") or "No feedback provided."
+    # Radar Chart
+    st.markdown("### Score Radar")
+    radar_chart(scores)
+
+    for key,title in [("code_quality","Code Quality"),("documentation","Documentation"),("adherence","Adherence to Requirements")]:
+        block=result.get(key,{})
+        feedback=block.get("feedback") or "No feedback provided."
         st.markdown(f"**{title} Feedback**")
         st.write(feedback)
 
-    rubric = result.get("rubric", {})
+    rubric=result.get("rubric",{})
     if rubric:
         with st.expander("Detailed Rubric"):
-            for list_key, nice in [
-                ("what_went_well", "What went well"),
-                ("areas_for_improvement", "Areas for improvement"),
-                ("suggested_next_steps", "Suggested next steps"),
-            ]:
-                items = rubric.get(list_key) or []
+            for list_key,nice in [("what_went_well","What went well"),("areas_for_improvement","Areas for improvement"),("suggested_next_steps","Suggested next steps")]:
+                items=rubric.get(list_key) or []
                 if items:
                     st.markdown(f"**{nice}**")
                     for it in items:
-                        st.write("- " + str(it))
+                        st.write("- "+str(it))
+
+    # Side-by-side view of uploaded files
+    st.markdown("### Uploaded Files Preview")
+    c1,c2=st.columns(2)
+    with c1:
+        st.subheader("Code Files")
+        st.code(code_text,language="python")
+    with c2:
+        st.subheader("Documentation")
+        st.text_area("Docs Preview",value=docs_text,height=400)
 
     st.divider()
     st.markdown("### Raw JSON")
-    st.json(result, expanded=False)
+    st.json(result,expanded=False)
 
-    st.download_button(
-        label="⬇️ Download report JSON",
-        data=json.dumps(result, ensure_ascii=False, indent=2),
-        file_name="codegrade_report.json",
-        mime="application/json",
-    )
-    
-    with st.expander("ℹ️ Notes & Environment Setup"):
-        st.markdown(
-            """
-            **Environment variables**
+    # Download JSON
+    st.download_button("⬇️ Download report JSON",data=json.dumps(result,ensure_ascii=False,indent=2),file_name="codegrade_report.json",mime="application/json")
 
-            - For OpenAI: set `OPENAI_API_KEY`
-            - For Gemini: set `GOOGLE_API_KEY` (or `GEMINI_API_KEY`)
+    # Export PDF button
+    if st.button("⬇️ Export Report as PDF"):
+        export_to_pdf(result)
+        with open("report.pdf","rb") as f:
+            st.download_button("Download PDF",f,file_name="codegrade_report.pdf")
 
-            **Install dependencies**
-            ```bash
-            pip install streamlit openai google-generativeai
-            ```
-
-            **Run locally**
-            ```bash
-            streamlit run app.py
-            ```
-
-            This app never executes uploaded code; it only reads files to perform a static review.
-            Large files may be truncated to fit within model limits.
-            """
-        )
+st.markdown("""
+<hr>
+<div style="text-align: center; padding: 20px;">
+    <p>Made with ❤️ for <b>NatWest Hack4Cause</b> by Team <b>HackX</b></p>
+</div>
+""",unsafe_allow_html=True)
