@@ -2,7 +2,7 @@
 
 ---
 
-## 📄 Summary of Your Solution (under 150 words)
+## 📄 Summary of Our Solution
 
 CodeGrade AI solves the problem of manual, time-consuming, and inconsistent code reviews for educators and developers. It works by using Large Language Models (like GPT-4o-mini and Gemini 1.5 Pro) to perform a secure, static analysis of the code. The tool evaluates code quality, documentation, and adherence to project requirements without ever running the code, ensuring safety. It provides a detailed, structured report with scores, a visual radar chart, and actionable feedback. The core technologies used are **Python**, **Streamlit**, and the **OpenAI & Google Gemini APIs**.
 
