@@ -1,42 +1,64 @@
 # 🎓 CodeGrade AI
 
-[![Python Version][python-shield]][python-url]
-[![Streamlit Version][streamlit-shield]][streamlit-url]
-[![License: MIT][license-shield]][license-url]
+[![Python Version](https://img.shields.io/badge/Python-3.8+-blue.svg?style=for-the-badge&logo=python)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg?style=for-the-badge&logo=streamlit)](https://streamlit.io)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991.svg?style=for-the-badge&logo=openai)](https://openai.com)
+[![Gemini](https://img.shields.io/badge/Google-Gemini_1.5_Pro-8A2BE2.svg?style=for-the-badge&logo=google-gemini)](https://ai.google.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-An elegant AI-powered assistant for static code review. CodeGrade AI leverages large language models like OpenAI's GPT and Google's Gemini to provide structured, insightful, and automated feedback on code submissions.
-
-This tool is designed for educators, teaching assistants, and developers who need to review code quickly and consistently. It analyzes code quality, documentation, and adherence to project requirements without ever executing the code, ensuring a safe and secure evaluation process.
+**A smart AI assistant that statically reviews your code and provides detailed feedback. Perfect for educators and developers!**
 
 ---
 
 ### ✨ App Preview
 
-![CodeGrade AI App Preview](https://i.imgur.com/LhB2O9V.png)
-*(A preview of the sleek and intuitive user interface)*
+![CodeGrade AI App Preview]
+<img width="923" height="894" alt="Image" src="https://github.com/user-attachments/assets/25395159-649a-4f6a-bf2a-eeb66e905b3c" />
+<img width="1009" height="760" alt="Image" src="https://github.com/user-attachments/assets/b6b79941-7a2a-4eec-a7ed-e394eb5b3e87" />
+<img width="943" height="775" alt="Image" src="https://github.com/user-attachments/assets/59c268df-c4ec-46e6-95d9-3ae78e06b09a" />
+<img width="979" height="378" alt="Image" src="https://github.com/user-attachments/assets/603f7ec8-4e70-4a5d-9cc2-02a9191b83a6" />
+<img width="957" height="864" alt="Image" src="https://github.com/user-attachments/assets/0746a286-9823-4aea-9dbd-8199629c244b" />
+<img width="974" height="282" alt="Image" src="https://github.com/user-attachments/assets/e5440b42-eb26-4048-8589-f5c8707afba3" />
+<img width="1016" height="806" alt="Image" src="https://github.com/user-attachments/assets/390c99f8-e90a-4633-8324-302cf820075b" />
+<img width="1011" height="692" alt="Image" src="https://github.com/user-attachments/assets/a73c40dc-b848-450e-8fa9-d266e384dfa5" />
+
+
+---
+
+## 📖 About The Project
+
+CodeGrade AI is a powerful tool that uses Large Language Models (like OpenAI's GPT and Google's Gemini) to provide structured and automated feedback on code submissions.
+
+This tool is specifically designed for educators, teaching assistants, and developers who need to review code quickly and consistently. It analyzes code quality, documentation, and project requirements, **without ever running the code**, which ensures a safe and secure evaluation process.
+
+*This project was created by **Team HackX** for the **NatWest Hack4Cause**.*
 
 ---
 
 ## 🚀 Key Features
 
-* **🤖 Dual AI Engine Support**: Seamlessly switch between **OpenAI (GPT models)** and **Google Gemini** for analysis.
-* **📊 Structured Evaluation**: Receive a detailed report with scores (0-10) and qualitative feedback across three core areas:
+* **🤖 Dual AI Engine Support**: Seamlessly switch between **OpenAI (GPT models)** and **Google Gemini**.
+* **📊 Structured Evaluation**: Get detailed reports with scores (0-10) in three core areas:
     * **Code Quality**: Readability, structure, and best practices.
     * **Documentation**: Clarity and completeness of the README file.
-    * **Adherence to Requirements**: How well the code meets the project goals.
-* **📝 Detailed Rubric**: Get actionable insights on "What Went Well," "Areas for Improvement," and "Suggested Next Steps."
-* **🔒 Secure by Design**: The app performs **static analysis only** and **never executes** uploaded code.
-* **⬇️ Downloadable Reports**: Export the complete evaluation as a JSON file for your records.
+    * **Adherence to Requirements**: How well the code follows the project goals.
+* **📝 Detailed Rubric**: Actionable insights on "What Went Well," "Areas for Improvement," and "Suggested Next Steps."
+* **🎨 Visual Reports**: Visualize scores on a beautiful **Radar Chart**.
+* **⬇️ Downloadable Reports**: Export the entire evaluation as a **JSON file**.
+* **🔒 Secure by Design**: The app only performs **static analysis** and **never executes** the uploaded code.
 * **🎨 Modern UI**: A clean, responsive, and user-friendly interface built with Streamlit.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Language**: Python
-* **Framework**: Streamlit
-* **AI Providers**: OpenAI API, Google Gemini API
-* **Dependencies**: `python-dotenv`, `openai`, `google-generativeai`
+This project is built using these technologies:
+
+* **Language**: `Python`
+* **Framework**: `Streamlit`
+* **AI Providers**: `OpenAI API`, `Google Gemini API`
+* **Core Libraries**: `python-dotenv`, `openai`, `google-generativeai`
+* **Visualization & Reporting**: `numpy`, `matplotlib`, `reportlab`
 
 ---
 
@@ -47,7 +69,7 @@ Follow these steps to set up and run CodeGrade AI on your local machine.
 ### 1. Prerequisites
 
 * **Python 3.8+**
-* **Git** for cloning the repository.
+* **Git** (to clone the repository).
 
 ### 2. Installation Steps
 
@@ -70,12 +92,13 @@ Follow these steps to set up and run CodeGrade AI on your local machine.
     ```
 
 3.  **Install the required dependencies**:
+    The project has a `requirements.txt` file that lists all the necessary libraries. [cite_start]Use it: [cite: 3]
     ```bash
-    pip install streamlit openai google-generativeai python-dotenv
+    pip install -r requirements.txt
     ```
 
 4.  **Set up your API keys**:
-    Create a file named `.env` in the root of your project directory and add your keys.
+    Create a file named `.env` in the project's root directory and add your API keys. You can start by copying `.env.example`.
     ```env
     # Get from: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
     OPENAI_API_KEY="sk-..."
@@ -84,9 +107,9 @@ Follow these steps to set up and run CodeGrade AI on your local machine.
     GOOGLE_API_KEY="AIza..."
     ```
 
-### 3. Running the Application
+### 3. Run the Application
 
-Once the installation is complete, run the following command in your terminal:
+After the installation is complete, run this command in your terminal:
 
 ```bash
 streamlit run app.py
