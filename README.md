@@ -1,4 +1,52 @@
-# 🎓 CodeGrade AI
+# 📬 NatWest Hack4aCause hackathon Project Submission
+
+---
+
+## 📄 Summary of Your Solution (under 150 words)
+
+CodeGrade AI solves the problem of manual, time-consuming, and inconsistent code reviews for educators and developers. It works by using Large Language Models (like GPT-4o-mini and Gemini 1.5 Pro) to perform a secure, static analysis of the code. The tool evaluates code quality, documentation, and adherence to project requirements without ever running the code, ensuring safety. It provides a detailed, structured report with scores, a visual radar chart, and actionable feedback. The core technologies used are **Python**, **Streamlit**, and the **OpenAI & Google Gemini APIs**.
+
+## 👥 Team Information
+
+| Field            | Details                               |
+| ---------------- | ------------------------------------- |
+| Team Name        | HackX                                 |
+| Title            | CodeGrade AI                          |
+| Theme            | AI-Powered Project Evaluator Tool    |
+| Contact Email    | shivanshjoshi2922@gmail.com           |
+| Participants     | Mohit Bajpai(Leader), Shivansh Joshi, Hemant Kumar, Karan Singh |
+| GitHub Usernames | @MohitBajpai78271, @shivanshjoshi08, @Hemantisbuilding, @SKaran872 |
+
+---
+
+## 🎥 Submission Video
+
+Provide a video walkthrough/demo of your project. You can upload it to a platform like YouTube, Google Drive, Loom, etc.
+
+- 📹 **Video Link**: https://drive.google.com/file/d/195W4vQRdz9E5clPptcJYv3hGq7jUJYIe/view?usp=sharing
+
+---
+
+## 🌐 Hosted App / Solution URL
+
+If your solution is deployed, share the live link here.
+
+- 🌍 **Deployed URL**: [https://codegradeai1.streamlit.app/]
+
+---
+
+## License
+
+Copyright 2025 FINOS
+
+Distributed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+SPDX-License-Identifier: [Apache-2.0](https://spdx.org/licenses/Apache-2.0)
+
+---
+<br>
+
+# 🎓 CodeGrade AI (Original README)
 
 [![Python Version](https://img.shields.io/badge/Python-3.8+-blue.svg?style=for-the-badge&logo=python)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-FF4B4B.svg?style=for-the-badge&logo=streamlit)](https://streamlit.io)
@@ -119,8 +167,3 @@ Follow these steps to set up and run CodeGrade AI on your local machine.
     ```
 
 ### 3. Run the Application
-
-After the installation is complete, run this command in your terminal:
-
-```bash
-streamlit run app.py
