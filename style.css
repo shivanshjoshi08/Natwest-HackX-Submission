@@ -1,3 +1,13 @@
+.stApp {
+    background-color: #401664;
+    color: #F0F2F6;
+}
+h1, h2, h3 {
+    color: #FFFFFF;
+}
+/* ...tumhara baaki dark theme CSS... */
+
+
 /* --- Base App Background --- */
 .stApp {
     background: linear-gradient(135deg, #401664 0%, #5e2b84 50%, #401664 100%);
