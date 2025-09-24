@@ -12,15 +12,15 @@
 
 ### ✨ App Preview
 
-![CodeGrade AI App Preview]
-<img width="923" height="894" alt="Image" src="https://github.com/user-attachments/assets/25395159-649a-4f6a-bf2a-eeb66e905b3c" />
+#### CodeGrade AI App Preview
+(<img width="923" height="894" alt="Image" src="https://github.com/user-attachments/assets/25395159-649a-4f6a-bf2a-eeb66e905b3c" />
 <img width="1009" height="760" alt="Image" src="https://github.com/user-attachments/assets/b6b79941-7a2a-4eec-a7ed-e394eb5b3e87" />
 <img width="943" height="775" alt="Image" src="https://github.com/user-attachments/assets/59c268df-c4ec-46e6-95d9-3ae78e06b09a" />
 <img width="979" height="378" alt="Image" src="https://github.com/user-attachments/assets/603f7ec8-4e70-4a5d-9cc2-02a9191b83a6" />
 <img width="957" height="864" alt="Image" src="https://github.com/user-attachments/assets/0746a286-9823-4aea-9dbd-8199629c244b" />
 <img width="974" height="282" alt="Image" src="https://github.com/user-attachments/assets/e5440b42-eb26-4048-8589-f5c8707afba3" />
 <img width="1016" height="806" alt="Image" src="https://github.com/user-attachments/assets/390c99f8-e90a-4633-8324-302cf820075b" />
-<img width="1011" height="692" alt="Image" src="https://github.com/user-attachments/assets/a73c40dc-b848-450e-8fa9-d266e384dfa5" />
+<img width="1011" height="692" alt="Image" src="https://github.com/user-attachments/assets/a73c40dc-b848-450e-8fa9-d266e384dfa5" />)
 
 
 ---
